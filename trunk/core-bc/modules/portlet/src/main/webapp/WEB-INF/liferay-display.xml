@@ -3,6 +3,7 @@
 <display>
         <category name="VGR Social">
                 <portlet id="public-profile" />
+                <portlet id="friends" />
         </category>
 </display>
 
