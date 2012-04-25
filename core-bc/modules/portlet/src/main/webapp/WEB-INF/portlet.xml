@@ -21,7 +21,6 @@
     <supports>
       <mime-type>text/html</mime-type>
       <portlet-mode>VIEW</portlet-mode>
-      <portlet-mode>EDIT</portlet-mode>
     </supports>
     <supported-locale>sv</supported-locale>
 
@@ -30,6 +29,29 @@
       <short-title>Publik profil</short-title>
       <keywords>profile</keywords>
     </portlet-info>
+
+    <supported-public-render-parameter>vgrProfileId</supported-public-render-parameter>
+  </portlet>
+
+  <portlet>
+    <portlet-name>friends</portlet-name>
+    <display-name>Vänner</display-name>
+    <portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+    <expiration-cache>0</expiration-cache>
+
+    <supports>
+      <mime-type>text/html</mime-type>
+      <portlet-mode>VIEW</portlet-mode>
+    </supports>
+    <supported-locale>sv</supported-locale>
+
+    <portlet-info>
+      <title>Vänner</title>
+      <short-title>Vänner</short-title>
+      <keywords>friends</keywords>
+    </portlet-info>
+
+    <supported-public-render-parameter>vgrProfileId</supported-public-render-parameter>
   </portlet>
 
 
@@ -37,6 +59,11 @@
     <description>User Login ID</description>
     <name>user.login.id</name>
   </user-attribute>
+
+  <public-render-parameter>
+    <identifier>vgrProfileId</identifier>
+    <qname>vgrProfileId</qname>
+  </public-render-parameter>
 
 
 </portlet-app>

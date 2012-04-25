@@ -17,63 +17,57 @@
  *
  */
 
-package se.vgregion.social.controller;
+package se.vgregion.social.controller.publicprofile;
 
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.model.User;
 import com.liferay.portal.theme.ThemeDisplay;
-import com.liferay.portlet.social.model.SocialRelation;
-import com.liferay.portlet.social.model.SocialRequest;
-import com.liferay.portlet.social.model.SocialRequestConstants;
+import com.liferay.portal.util.PortalUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.portlet.bind.annotation.ActionMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
 import org.springframework.web.portlet.bind.annotation.ResourceMapping;
 import org.springframework.web.portlet.multipart.MultipartActionRequest;
-import se.vgregion.social.service.PublicProfileService;
-import se.vgregion.social.service.PublicProfileServiceException;
+import se.vgregion.social.service.SocialService;
+import se.vgregion.social.service.SocialServiceException;
 
 import javax.portlet.*;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * This controller class performs a search for actors.
  *
  * @author simgo3
+ * @author Patrik Bergström
  */
 
 @Controller
 @RequestMapping(value = "VIEW")
 public class PublicProfileController {
 
-    private final Logger LOGGER = LoggerFactory.getLogger(PublicProfileController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PublicProfileController.class);
+    private static final String VGR_PROFILE_ID = "vgrProfileId";
 
-    //    private ImageLocalService imageLocalService;
-//    private SocialRequestLocalService socialRequestLocalService;
-//    private SocialRelationLocalService socialRelationLocalService;
-//    private UserLocalService userLocalService;
-//    private IGImageLocalService imageLocalService;
-//    private ExpandoUtil expandoUtil;
-    private PublicProfileService service;
+    private SocialService service;
 
     @Autowired
-    public PublicProfileController(PublicProfileService service) {
-//        this.imageLocalService = ImageLocalServiceUtil.getService();
-//        this.imageLocalService = IGImageLocalServiceUtil.getService();
-//        this.socialRequestLocalService = SocialRequestLocalServiceUtil.getService();
-//        this.socialRelationLocalService = SocialRelationLocalServiceUtil.getService();
-//        this.userLocalService = UserLocalServiceUtil.getService();
-//        this.expandoUtil = expandoUtil;
+    public PublicProfileController(SocialService service) {
         this.service = service;
+    }
+
+    @ActionMapping
+    public void setPublicRenderParameters(ActionRequest request, ActionResponse response) {
+        String vgrProfileId = request.getParameter(VGR_PROFILE_ID);
+        System.out.println("vgrProfileId " + vgrProfileId);
+        response.setRenderParameter(VGR_PROFILE_ID, vgrProfileId); // Public render parameter
     }
 
     /**
@@ -85,10 +79,17 @@ public class PublicProfileController {
      * @return the profile view
      */
     @RenderMapping
-    public String showActorArticleView(RenderRequest request, RenderResponse response, Model model) {
+    public String showPublicProfileView(RenderRequest request, RenderResponse response, Model model,
+                                        @RequestParam(value = "message", required = false) String message) {
 
         ThemeDisplay themeDisplay = (ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY);
-        String vgrProfileId = request.getParameter("vgrProfileId");
+        String vgrProfileId = request.getParameter(VGR_PROFILE_ID);
+
+        if (message != null) {
+            model.addAttribute("message", message);
+        } else {
+            model.asMap().remove("message");
+        }
 
         try {
 
@@ -100,7 +101,6 @@ public class PublicProfileController {
             User userToShow;
             if (vgrProfileId == null || loggedInUserScreenName.equals(vgrProfileId)) {
                 vgrProfileId = loggedInUserScreenName;
-                System.out.println("vgrProfileId = " + vgrProfileId);
                 ownProfile = true;
                 userToShow = loggedInUser;
             } else {
@@ -109,44 +109,25 @@ public class PublicProfileController {
             }
 
             if (!ownProfile) {
-                boolean isFriend = service.hasFriendRelation(userToShow.getUserId(),
-                        loggedInUser.getUserId()); // Don't know why it should be "2" but I saw it in some ContactsUtil class
-
+                boolean isFriend = service.hasFriendRelation(userToShow.getUserId(), loggedInUser.getUserId());
                 model.addAttribute("isFriend", isFriend);
+
+                boolean hasCurrentFriendRequest = service.hasCurrentFriendRequest(loggedInUser.getUserId(),
+                        userToShow.getUserId());
+                model.addAttribute("hasCurrentFriendRequest", hasCurrentFriendRequest);
             }
 
             userToShow.getEmailAddress();
-
-            System.out.println("tf = " + userToShow.getDisplayURL(themeDisplay));
 
             model.addAttribute("ownProfile", ownProfile);
             model.addAttribute("profileImage", "/image/user_male_portrait?img_id=" + userToShow.getPortraitId());
             model.addAttribute("user", userToShow);
 
-//            String language = (String) userToShow.getExpandoBridge().getAttribute("language");
+            model.addAttribute("userAbout", service.getUserAbout(userToShow));
             String language = service.getLanguage(userToShow);
             model.addAttribute("language", language);
 
-            List<User> friends = service.getFriends(userToShow);
-
-            model.addAttribute("friends", friends);
-
-            // Friend requests
-            List<SocialRequest> friendRequests = service.getUserRequests(loggedInUser);
-
-            Map<SocialRequest, User> friendRequestUserMap = new HashMap<SocialRequest, User>();
-            for (SocialRequest friendRequest : friendRequests) {
-                if (friendRequest.getStatus() == SocialRequestConstants.STATUS_PENDING) {
-                    User receiverUser = service.getUserById(friendRequest.getReceiverUserId());
-                    friendRequestUserMap.put(friendRequest, receiverUser);
-                }
-            }
-
-            model.addAttribute("friendRequests", friendRequestUserMap);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } catch (PublicProfileServiceException e) {
+        } catch (SocialServiceException e) {
             LOGGER.error(e.getMessage(), e);
         }
 
@@ -159,49 +140,58 @@ public class PublicProfileController {
     }
 
     @ActionMapping(params = "action=uploadProfileImage")
-    public void uploadProfileImage(MultipartActionRequest request) throws IOException, PublicProfileServiceException {
+    public void uploadProfileImage(MultipartActionRequest request) throws IOException, SocialServiceException {
         MultipartFile profileImageInput = request.getFile("profileImage");
+        /*BufferedImage bufferedImage = ImageIO.read(profileImageInput.getInputStream());
+        BufferedImage dimg = new BufferedImage(50, 100, bufferedImage.getType());
+        Graphics2D g = dimg.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+        g.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_DEFAULT);
+        g.drawImage(bufferedImage, 0, 0, 50, 200, 0, 0, bufferedImage.getWidth(), bufferedImage.getHeight(), null);
+        g.dispose();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        JPEGImageEncoder jpegEncoder = JPEGCodec.createJPEGEncoder(baos);
+        jpegEncoder.encode(dimg);*/
         long loggedInUserId = getLoggedInUserId(request);
+//        service.updatePortrait(loggedInUserId, baos.toByteArray());
         service.updatePortrait(loggedInUserId, profileImageInput.getBytes());
     }
 
     @ResourceMapping(value = "submitProperty")
     public void submitProperty(ResourceRequest request, ResourceResponse response)
-            throws PublicProfileServiceException {
+            throws SocialServiceException {
         String key = request.getParameter("key");
         String value = request.getParameter("value");
         User loggedInUser = getLoggedInUser(request);
 
         if ("jobTitle".equals(key)) {
-            System.out.println("jobTitle submitted");
             loggedInUser.setJobTitle(value);
             service.updateUser(loggedInUser);
         } else if ("userAbout".equals(key)) {
             service.setUserAbout(loggedInUser, value);
+        } else if ("language".equals(key)) {
+            service.setLanguage(loggedInUser, value);
         }
 
     }
 
     @ActionMapping(params = "action=requestFriend")
-    public void requestFriend(ActionRequest request, ActionResponse response) throws PublicProfileServiceException {
+    public void requestFriend(ActionRequest request, ActionResponse response) throws SocialServiceException {
         Long userId = Long.valueOf(request.getParameter("userId"));
-        SocialRelation s;
-        long loggedInUserId = getLoggedInUserId(request);
-        service.addFriendRequest(userId, loggedInUserId);
-    }
-
-    @ActionMapping(params = "action=acceptFriend")
-    public void acceptFriend(ActionRequest request, ActionResponse response) throws PublicProfileServiceException {
         long loggedInUserId = getLoggedInUserId(request);
 
-        Long requestId = Long.valueOf(request.getParameter("requestId"));
-
-        SocialRequest socialRequest = service.getSocialRequest(requestId);
-        long receiverUserId = socialRequest.getReceiverUserId();
-
-        service.addFriendRelation(loggedInUserId, receiverUserId);
-
-        service.confirmRequest(socialRequest);
+        // Whether they already have a relation
+        if (!service.hasFriendRelation(loggedInUserId, userId)) {
+            if (service.hasCurrentFriendRequest(loggedInUserId, userId)) {
+                return;
+            }
+            // The other way around
+            if (service.hasCurrentFriendRequest(userId, loggedInUserId)) {
+                response.setRenderParameter("message", "Denna person har redan en förfrågan till dig");
+                return;
+            }
+            service.addFriendRequest(loggedInUserId, userId);
+        }
     }
 
     private String getLoggedInUserScreenName(PortletRequest request) {

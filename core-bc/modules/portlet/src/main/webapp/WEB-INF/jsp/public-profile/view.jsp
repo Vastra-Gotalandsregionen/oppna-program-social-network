@@ -37,6 +37,15 @@
         display: inline;
     }
 
+    .public-profile .user-property-heading {
+        font-weight: bold;
+    }
+
+    .public-profile .user-about-text {
+        min-height: 50px;
+        min-width: 350px;
+    }
+
     .profile-edit-trigger {
         background: transparent url(/regionportalen-theme/images/common/edit.png) right center no-repeat;
         cursor: pointer;
@@ -57,19 +66,7 @@
         /*padding: 5px 10px 0px 0px;*/
     }
 
-    .accept-reject .accept, .accept-reject .reject {
-        background-repeat: no-repeat;
-        height: 30px;
-        width: 30px;
-    }
 
-    .accept-reject .accept {
-        background-image: url('/rp-new-theme/images/common/checked.png');
-    }
-
-    .accept-reject .reject {
-        background-image: url('/rp-new-theme/images/common/close.png');
-    }
 </style>
 
 <portlet:actionURL var="requestFriend">
@@ -82,7 +79,11 @@
 
 <div class="portlet-body public-profile">
     <div class="summary-container">
-        <h2>${user.fullName}</h2>
+        <c:if test="${not empty message}">
+            <div class="portlet-msg-info">${message}</div>
+        </c:if>
+
+        <h2><a href="/group/vgregion/social/-/user/${user.screenName}"><c:out value="${user.fullName}"/></a></h2>
         <c:choose>
             <c:when test="${ownProfile}">
                 <a id="<portlet:namespace/>editProfileImage" href="${editProfileImage}" title="Ändra bild">
@@ -95,12 +96,7 @@
             </c:otherwise>
         </c:choose>
         <c:choose>
-            <c:when test="${isFriend}">
-                <p class="remove-friend">
-                    <liferay-ui:icon image="join" label="true" message="remove-friend" url=""/>
-                </p>
-            </c:when>
-            <c:when test="${isFriendRequestPending}">
+            <c:when test="${hasCurrentFriendRequest}">
                 <div class="portlet-msg-info add-as-friend pending">
                     <liferay-ui:message key="friend-requested"/>
                 </div>
@@ -116,96 +112,41 @@
         </c:choose>
 
         <p>
-            <span class="user-job-title"><liferay-ui:message key="job-title"/></span>
+            <span class="user-property-heading user-job-title"><liferay-ui:message key="job-title"/></span>
             : <span id="<portlet:namespace/>jobTitleText" class="job-title-text">${user.jobTitle}</span>
             <c:if test="${ownProfile}">
                 <span class="profile-edit-trigger profile-edit-trigger-job-title">Redigera text</span>
                 <span id="<portlet:namespace/>jobTitleCheck" style="opacity: 0;"
                       class="portlet-msg-success">Sparat!</span>
-
-                <%--<form id="<portlet:namespace/>jobTitleForm" action="${updateJobTitle}">
-                    <input id="<portlet:namespace/>jobTitleTextInput" type="hidden" name="jobTitle"/>
-                </form>--%>
             </c:if>
         </p>
 
         <p>
-      <span class="user-about"><liferay-ui:message key="about-me"/>
+      <span class="user-property-heading user-about"><liferay-ui:message key="about-me"/>
       </span>
-            : <span id="<portlet:namespace/>userAboutText" class="user-about-text">${userAbout}</span>
-            <c:if test="${ownProfile}">
+            : <c:if test="${ownProfile}">
                 <span class="profile-edit-trigger profile-edit-trigger-user-about">Redigera text</span>
                 <span id="<portlet:namespace/>userAboutCheck" style="opacity: 0;"
                       class="portlet-msg-success">Sparat!</span>
             </c:if>
+            <div id="<portlet:namespace/>userAboutText" class="user-about-text"><c:out value="${userAbout}"/></div>
+
         </p>
 
         <p>
-      <span class="user-language"><liferay-ui:message key="language"/>
+      <span class="user-property-heading user-language"><liferay-ui:message key="language"/>
       </span>
-            : ${language}
+            : <span id="<portlet:namespace/>languageText" class="language-text"><c:out value="${language}"/></span>
+            <c:if test="${ownProfile}">
+                <span class="profile-edit-trigger profile-edit-trigger-language">Redigera text</span>
+                <span id="<portlet:namespace/>languageCheck" style="opacity: 0;"
+                      class="portlet-msg-success">Sparat!</span>
+            </c:if>
         </p>
 
     </div>
 
-    <%--<c:if test="true">
-        <br/>
-        <portlet:renderURL var="editURL"/>
-
-        <liferay-ui:icon image="edit" label="true" url="${editURL}"/>
-    </c:if>--%>
-
-    <c:if test="${ownProfile}">
-        <h3>Vänförfrågningar</h3>
-        <ul class="public-profile-friends-list clearfix">
-
-            <c:forEach items="${friendRequests}" var="friendRequest">
-                <c:set var="user" value="${friendRequest.value}"/>
-                <portlet:actionURL var="acceptFriend">
-                    <portlet:param name="action" value="acceptFriend"/>
-                    <portlet:param name="requestId" value="${friendRequest.key.requestId}"/>
-                </portlet:actionURL>
-                <portlet:actionURL var="rejectFriend">
-                    <portlet:param name="action" value="rejectFriend"/>
-                    <portlet:param name="requestId" value="${friendRequest.key.requestId}"/>
-                </portlet:actionURL>
-
-                <li>
-                    <div style="height: 30px">
-                        <img alt="${user.fullName}"
-                             src="/image/user_${user.male ? 'male' : 'female'}_portrait?img_id=${user.portraitId}"
-                             height="30"/>
-                        <span>${user.fullName}</span>
-                        <span class="accept-reject">
-                            <a href="${acceptFriend}"><span title="Godkänn" class="accept">&nbsp;</span></a>
-                            <a href="${rejectFriend}"><span title="Avslå" class="reject">&nbsp;</span></a>
-                        </span>
-                    </div>
-                </li>
-            </c:forEach>
-
-        </ul>
-    </c:if>
-
-    <h3><liferay-ui:message key="friends"/></h3>
-    <ul class="public-profile-friends-list clearfix">
-        <c:forEach items="${friends}" var="friend">
-            <li>
-                <span>
-                    <a href="/group/vgregion/social/-/user/${friend.screenName}">
-                        <img alt="test" src="/image/user_male_portrait?img_id=${friend.portraitId}" height="30">
-                            ${friend.fullName}
-                    </a>
-                </span>
-            </li>
-        </c:forEach>
-    </ul>
-</div>
-
 <c:if test="${ownProfile}">
-    <%--<aui:script use="aui-base,profile">--%>
-    <%--&lt;%&ndash;<%@ include file="editIFeedFormJs.jspf" %>&ndash;%&gt;--%>
-    <%--</aui:script>--%>
     <script type="text/javascript" src="<%= request.getContextPath() %>/js/social-config.js"></script>
     <aui:script use="aui-base,social-config">
         <%@ include file="profile.jspf" %>

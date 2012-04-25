@@ -26,22 +26,15 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-  <context:component-scan base-package="se.vgregion.social.controller.publicprofile"/>
-
-  <bean id="portletMultipartResolver"
-        class="org.springframework.web.portlet.multipart.CommonsPortletMultipartResolver">
-
-    <!-- one of the properties available; the maximum file size in bytes -->
-    <property name="maxUploadSize" value="10485760"/> <!-- 10485760 = 10 MB -->
-  </bean>
+  <context:component-scan base-package="se.vgregion.social.controller.friends"/>
 
   <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
     <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
-    <property name="prefix" value="/WEB-INF/jsp/public-profile/"/>
+    <property name="prefix" value="/WEB-INF/jsp/friends/"/>
     <property name="suffix" value=".jsp"/>
     <property name="contentType" value="text/html;charset=UTF-8"/>
   </bean>
-
+  
 </beans>
 
 

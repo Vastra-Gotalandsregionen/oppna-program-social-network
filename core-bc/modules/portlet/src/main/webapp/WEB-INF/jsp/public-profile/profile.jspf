@@ -1,30 +1,15 @@
-<%--<%@ taglib prefix="portlet" uri="http://java.sun.com/portlet" %>--%>
-
 <portlet:resourceURL var="submitUrl" id="submitProperty">
 </portlet:resourceURL>
 
 var socialConfig = new A.SocialConfig({
     jobTitleCheck: '#<portlet:namespace/>jobTitleCheck',
-    <%--jobTitleForm: '#<portlet:namespace/>jobTitleForm',--%>
-    <%--jobTitleInput: '#<portlet:namespace/>jobTitleTextInput',--%>
     jobTitleNode: '#<portlet:namespace/>jobTitleText',
+    languageCheck: '#<portlet:namespace/>languageCheck',
+    languageNode: '#<portlet:namespace/>languageText',
     portletWrap: '#p_p_id<portlet:namespace />',
     submitUrl: '${submitUrl}',
     userAboutCheck: '#<portlet:namespace/>userAboutCheck',
     userAboutNode: '#<portlet:namespace/>userAboutText'
-
-<%--existingFiltersTreeBoundingBox: '#<portlet:namespace />existingFiltersWrap',--%>
-<%--existingFiltersTreeContentBox: '#<portlet:namespace />existingFiltersWrap > ul',--%>
-<%--descriptionNode: '#<portlet:namespace />descriptionText',--%>
-<%--descriptionInput: '#<portlet:namespace />descriptionTextInput',--%>
-<%--metaDataForm: '#<portlet:namespace />metaDataForm',--%>
-<%--headingNode: '#<portlet:namespace />headingText',--%>
-<%--headingInput: '#<portlet:namespace />headingTextInput',--%>
-<%--portletNamespace: '<portlet:namespace />',--%>
-<%--portletWrap: '#p_p_id<portlet:namespace />',--%>
-<%--usedFiltersTreeBoundingBox: '#<portlet:namespace />usedFiltersWrap',--%>
-<%--usedFiltersTreeContentBox: '#<portlet:namespace />usedFiltersWrap > ul',--%>
-<%--metadataTooltipURL: '${metdataTooltipURL}'--%>
 })
 .render();
   
