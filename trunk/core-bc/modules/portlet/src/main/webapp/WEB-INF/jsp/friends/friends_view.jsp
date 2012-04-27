@@ -2,13 +2,16 @@
 <%@ taglib prefix="portlet" uri="http://java.sun.com/portlet" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="liferay-ui" uri="http://liferay.com/tld/ui" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <style type="text/css">
     .friends-portlet .friend-list-link img, .friends-portlet .friend-list-link span {
-        /*display: block;*/
         float: left;
         line-height: 30px;
-        /*padding: 5px 10px 0px 0px;*/
+    }
+
+    .friends-portlet a:hover {
+        cursor: pointer; /* IE7 doesn't do this automatically */
     }
 
     .friends-portlet .friend-list-link span {
@@ -24,7 +27,6 @@
     }
 
     .friends-portlet .accept-reject .accept, .friends-portlet .accept-reject .reject, .friends-portlet .delete {
-        /*background-repeat: no-repeat;*/
         float: left;
         height: 30px;
         width: 30px;
@@ -43,13 +45,21 @@
     <portlet:param name="userId" value="${user.userId}"/>
 </portlet:actionURL>
 
+<c:set var="userUrlPrefix" value="/group/vgregion/social/-/user/"/>
+
 <div class="portlet-body friends-portlet">
 
     <c:if test="${not empty message}">
-        <div class="portlet-msg-info">${message}</div>
+        <div class="portlet-msg-info"><c:out value="${message}"/></div>
+    </c:if>
+    <c:if test="${not empty acceptedFriend}">
+        <div class="portlet-msg-info">
+            <c:out value="Du är nu vän med "/>
+            <a href="${userUrlPrefix}${acceptedFriend.screenName}"><c:out value="${acceptedFriend.fullName}."/></a>
+        </div>
     </c:if>
 
-    <c:if test="${ownProfile}">
+    <c:if test="${ownProfile and fn:length(friendRequests) gt 0}">
         <h3>Vänförfrågningar</h3>
         <ul class="friends-list clearfix">
 
@@ -65,11 +75,11 @@
                 </portlet:actionURL>
 
                 <li>
-                    <div style="height: 30px">
-                        <img alt="${user.fullName}"
-                             src="/image/user_${user.male ? 'male' : 'female'}_portrait?img_id=${user.portraitId}"
-                             height="30"/>
-                        <span><a href="/group/vgregion/social/-/user/${user.screenName}">${user.fullName}</a></span>
+                    <div class="friend-list-row">
+                        <a class="friend-list-link" href="${userUrlPrefix}${user.screenName}">
+                            <img alt="test" src="/image/user_male_portrait?img_id=${user.portraitId}" height="30">
+                            <span><c:out value="${user.fullName}"/></span>
+                        </a>
                         <span class="accept-reject">
                             <a href="${acceptFriend}"><span title="Godkänn" class="accept">&nbsp;</span></a>
                             <a href="${rejectFriend}"><span title="Avslå" class="reject">&nbsp;</span></a>
@@ -90,7 +100,7 @@
             </portlet:actionURL>
             <li>
                 <div class="friend-list-row">
-                    <a class="friend-list-link" href="/group/vgregion/social/-/user/${friend.screenName}">
+                    <a class="friend-list-link" href="${userUrlPrefix}${friend.screenName}">
                         <img alt="test" src="/image/user_male_portrait?img_id=${friend.portraitId}" height="30">
                         <span>${friend.fullName}</span>
                     </a>
