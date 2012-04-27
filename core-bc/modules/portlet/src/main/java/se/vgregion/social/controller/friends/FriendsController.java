@@ -68,17 +68,10 @@ public class FriendsController {
      * @return the profile view
      */
     @RenderMapping
-    public String showActorArticleView(RenderRequest request, RenderResponse response, Model model,
-                                       @RequestParam(value = "message", required = false) String message) {
+    public String showFriendsView(RenderRequest request, RenderResponse response, Model model) {
 
         ThemeDisplay themeDisplay = (ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY);
         String vgrProfileId = request.getParameter("vgrProfileId");
-
-        if (message != null) {
-            model.addAttribute("message", message);
-        } else {
-            model.asMap().remove("message");
-        }
 
         try {
 
@@ -95,13 +88,6 @@ public class FriendsController {
                 ownProfile = false;
                 userToShow = service.getUserByScreenName(themeDisplay.getCompanyId(), vgrProfileId);
             }
-
-            /*if (!ownProfile) {
-                boolean isFriend = service.hasFriendRelation(userToShow.getUserId(),
-                        loggedInUser.getUserId()); // Don't know why it should be "2" but I saw it in some ContactsUtil class
-
-                model.addAttribute("isFriend", isFriend);
-            }*/
 
             model.addAttribute("ownProfile", ownProfile);
 
@@ -133,6 +119,10 @@ public class FriendsController {
         Long requestId = Long.valueOf(request.getParameter("requestId"));
         SocialRequest socialRequest = service.getSocialRequest(requestId);
 
+        User requester = service.getUserById(socialRequest.getUserId());
+
+        request.setAttribute("acceptedFriend", requester);
+
         service.confirmRequest(socialRequest);
     }
 
@@ -141,7 +131,7 @@ public class FriendsController {
         Long requestId = Long.valueOf(request.getParameter("requestId"));
         SocialRequest socialRequest = service.getSocialRequest(requestId);
 
-        response.setRenderParameter("message", "Du har ignorerat denna förfrågan.");
+        request.setAttribute("message", "Du har ignorerat denna förfrågan.");
 
         service.rejectRequest(socialRequest);
     }
@@ -153,7 +143,7 @@ public class FriendsController {
         long loggedInUserId = getLoggedInUserId(request);
         if (service.hasFriendRelation(loggedInUserId, userToDelete)) {
             service.removeFriend(loggedInUserId, userToDelete);
-            response.setRenderParameter("message", "Du har raderat denna vän.");
+            request.setAttribute("message", "Du har raderat denna vän.");
         }
 
     }

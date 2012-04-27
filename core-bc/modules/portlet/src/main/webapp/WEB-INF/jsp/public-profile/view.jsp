@@ -33,10 +33,6 @@
 
 <style type="text/css">
 
-    .public-profile span.portlet-msg-success {
-        display: inline;
-    }
-
     .public-profile .user-property-heading {
         font-weight: bold;
     }
@@ -55,18 +51,6 @@
         width: 16px;
     }
 
-    .public-profile-friends-list li {
-        list-style: none;
-    }
-
-    .public-profile-friends-list li span, .public-profile-friends-list li img {
-        display: block;
-        float: left;
-        line-height: 30px;
-        /*padding: 5px 10px 0px 0px;*/
-    }
-
-
 </style>
 
 <portlet:actionURL var="requestFriend">
@@ -77,13 +61,15 @@
     <portlet:param name="action" value="showEditProfileImage"/>
 </portlet:renderURL>
 
+<c:set var="userUrlPrefix" value="/group/vgregion/social/-/user/"/>
+
 <div class="portlet-body public-profile">
     <div class="summary-container">
         <c:if test="${not empty message}">
             <div class="portlet-msg-info">${message}</div>
         </c:if>
 
-        <h2><a href="/group/vgregion/social/-/user/${user.screenName}"><c:out value="${user.fullName}"/></a></h2>
+        <h2><a href="${userUrlPrefix}${user.screenName}"><c:out value="${user.fullName}"/></a></h2>
         <c:choose>
             <c:when test="${ownProfile}">
                 <a id="<portlet:namespace/>editProfileImage" href="${editProfileImage}" title="Ändra bild">
@@ -96,13 +82,17 @@
             </c:otherwise>
         </c:choose>
         <c:choose>
-            <c:when test="${hasCurrentFriendRequest}">
-                <div class="portlet-msg-info add-as-friend pending">
+            <c:when test="${hasFriendRequest}">
+                <div class="portlet-msg-info">
                     <liferay-ui:message key="friend-requested"/>
                 </div>
             </c:when>
+            <c:when test="${otherUserHasFriendRequest}">
+                <div class="portlet-msg-info">
+                    <c:out value="${user.fullName} har redan en förfrågan på dig."/>
+                </div>
+            </c:when>
             <c:when test="${not isFriend and not ownProfile}">
-
                 <p class="add-as-friend">
                     <a href="${requestFriend}">
                         <liferay-ui:icon image="join" label="true" message="add-as-friend" url=""/>
@@ -112,38 +102,36 @@
         </c:choose>
 
         <p>
-            <span class="user-property-heading user-job-title"><liferay-ui:message key="job-title"/></span>
-            : <span id="<portlet:namespace/>jobTitleText" class="job-title-text">${user.jobTitle}</span>
+            <span class="user-property-heading user-job-title"><liferay-ui:message key="job-title"/></span>:
+            <span id="<portlet:namespace/>jobTitleText" class="job-title-text">
+                <c:out value="${user.jobTitle}"/>
+            </span>
             <c:if test="${ownProfile}">
                 <span class="profile-edit-trigger profile-edit-trigger-job-title">Redigera text</span>
-                <span id="<portlet:namespace/>jobTitleCheck" style="opacity: 0;"
+                <span id="<portlet:namespace/>jobTitleCheck" style="display: none;"
                       class="portlet-msg-success">Sparat!</span>
             </c:if>
         </p>
 
         <p>
-      <span class="user-property-heading user-about"><liferay-ui:message key="about-me"/>
-      </span>
-            : <c:if test="${ownProfile}">
+            <span class="user-property-heading user-about"><liferay-ui:message key="about-me"/></span>:
+            <c:if test="${ownProfile}">
                 <span class="profile-edit-trigger profile-edit-trigger-user-about">Redigera text</span>
-                <span id="<portlet:namespace/>userAboutCheck" style="opacity: 0;"
+                <span id="<portlet:namespace/>userAboutCheck" style="display: none;"
                       class="portlet-msg-success">Sparat!</span>
             </c:if>
             <div id="<portlet:namespace/>userAboutText" class="user-about-text"><c:out value="${userAbout}"/></div>
-
         </p>
 
         <p>
-      <span class="user-property-heading user-language"><liferay-ui:message key="language"/>
-      </span>
-            : <span id="<portlet:namespace/>languageText" class="language-text"><c:out value="${language}"/></span>
+            <span class="user-property-heading user-language"><liferay-ui:message key="language"/></span>:
+            <span id="<portlet:namespace/>languageText" class="language-text"><c:out value="${language}"/></span>
             <c:if test="${ownProfile}">
                 <span class="profile-edit-trigger profile-edit-trigger-language">Redigera text</span>
-                <span id="<portlet:namespace/>languageCheck" style="opacity: 0;"
+                <span id="<portlet:namespace/>languageCheck" style="display: none;"
                       class="portlet-msg-success">Sparat!</span>
             </c:if>
         </p>
-
     </div>
 
 <c:if test="${ownProfile}">

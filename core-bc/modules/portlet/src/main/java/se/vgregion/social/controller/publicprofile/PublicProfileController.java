@@ -22,14 +22,12 @@ package se.vgregion.social.controller.publicprofile;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.model.User;
 import com.liferay.portal.theme.ThemeDisplay;
-import com.liferay.portal.util.PortalUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.portlet.bind.annotation.ActionMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
@@ -39,7 +37,6 @@ import se.vgregion.social.service.SocialService;
 import se.vgregion.social.service.SocialServiceException;
 
 import javax.portlet.*;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 /**
@@ -66,7 +63,6 @@ public class PublicProfileController {
     @ActionMapping
     public void setPublicRenderParameters(ActionRequest request, ActionResponse response) {
         String vgrProfileId = request.getParameter(VGR_PROFILE_ID);
-        System.out.println("vgrProfileId " + vgrProfileId);
         response.setRenderParameter(VGR_PROFILE_ID, vgrProfileId); // Public render parameter
     }
 
@@ -79,17 +75,10 @@ public class PublicProfileController {
      * @return the profile view
      */
     @RenderMapping
-    public String showPublicProfileView(RenderRequest request, RenderResponse response, Model model,
-                                        @RequestParam(value = "message", required = false) String message) {
+    public String showPublicProfileView(RenderRequest request, RenderResponse response, Model model) {
 
         ThemeDisplay themeDisplay = (ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY);
         String vgrProfileId = request.getParameter(VGR_PROFILE_ID);
-
-        if (message != null) {
-            model.addAttribute("message", message);
-        } else {
-            model.asMap().remove("message");
-        }
 
         try {
 
@@ -100,7 +89,6 @@ public class PublicProfileController {
             boolean ownProfile;
             User userToShow;
             if (vgrProfileId == null || loggedInUserScreenName.equals(vgrProfileId)) {
-                vgrProfileId = loggedInUserScreenName;
                 ownProfile = true;
                 userToShow = loggedInUser;
             } else {
@@ -112,9 +100,13 @@ public class PublicProfileController {
                 boolean isFriend = service.hasFriendRelation(userToShow.getUserId(), loggedInUser.getUserId());
                 model.addAttribute("isFriend", isFriend);
 
-                boolean hasCurrentFriendRequest = service.hasCurrentFriendRequest(loggedInUser.getUserId(),
+                boolean hasFriendRequest = service.hasCurrentFriendRequest(loggedInUser.getUserId(),
                         userToShow.getUserId());
-                model.addAttribute("hasCurrentFriendRequest", hasCurrentFriendRequest);
+                model.addAttribute("hasFriendRequest", hasFriendRequest);
+
+                boolean otherUserHasFriendRequest = service.hasCurrentFriendRequest(userToShow.getUserId(),
+                        loggedInUser.getUserId());
+                model.addAttribute("otherUserHasFriendRequest", otherUserHasFriendRequest);
             }
 
             userToShow.getEmailAddress();
@@ -183,11 +175,12 @@ public class PublicProfileController {
         // Whether they already have a relation
         if (!service.hasFriendRelation(loggedInUserId, userId)) {
             if (service.hasCurrentFriendRequest(loggedInUserId, userId)) {
+                // Say nothing to the user since he/she probably just has reposted the last request
                 return;
             }
             // The other way around
             if (service.hasCurrentFriendRequest(userId, loggedInUserId)) {
-                response.setRenderParameter("message", "Denna person har redan en förfrågan till dig");
+                request.setAttribute("message", "Denna person har redan en förfrågan till dig");
                 return;
             }
             service.addFriendRequest(loggedInUserId, userId);

@@ -104,13 +104,13 @@ AUI().add('social-config', function(A) {
                                 success: function (event, id, xhr) {
                                     var res = this.get('responseData');
                                     var confirmNode = instance.get(confirmElement);
-                                    confirmNode.setStyle('opacity', 1);
+                                    confirmNode.setStyle('display', 'inline');
                                     var anim = new A.Anim({
                                         node: '#' + confirmNode.get('id'),
                                         to: {opacity: 0}
                                     });
                                     A.later(5000, instance, function() {
-                                        anim.run();
+                                        confirmNode.setStyle('display', 'none');
                                     }, [], false);
                                 }
                             }
@@ -157,7 +157,7 @@ AUI().add('social-config', function(A) {
                     }
 
                     if(editableNode) {
-                        editableNode.simulate('click');
+                        editableNode.simulate('click'); // Doesn't work in IE9. Possibly fixed YUI in 3.3.0?
                     }
                 }
 
