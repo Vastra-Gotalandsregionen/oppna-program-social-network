@@ -35,8 +35,12 @@ import org.springframework.web.portlet.bind.annotation.ResourceMapping;
 import org.springframework.web.portlet.multipart.MultipartActionRequest;
 import se.vgregion.social.service.SocialService;
 import se.vgregion.social.service.SocialServiceException;
+import se.vgregion.social.util.ImageUtil;
 
+import javax.imageio.ImageIO;
 import javax.portlet.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 /**
@@ -134,19 +138,22 @@ public class PublicProfileController {
     @ActionMapping(params = "action=uploadProfileImage")
     public void uploadProfileImage(MultipartActionRequest request) throws IOException, SocialServiceException {
         MultipartFile profileImageInput = request.getFile("profileImage");
-        /*BufferedImage bufferedImage = ImageIO.read(profileImageInput.getInputStream());
-        BufferedImage dimg = new BufferedImage(50, 100, bufferedImage.getType());
-        Graphics2D g = dimg.createGraphics();
-        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-        g.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_DEFAULT);
-        g.drawImage(bufferedImage, 0, 0, 50, 200, 0, 0, bufferedImage.getWidth(), bufferedImage.getHeight(), null);
-        g.dispose();
+
+        if (profileImageInput == null || profileImageInput.getSize() <= 0) {
+            return;
+        }
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        JPEGImageEncoder jpegEncoder = JPEGCodec.createJPEGEncoder(baos);
-        jpegEncoder.encode(dimg);*/
+
+        final int croppedWidth = 160;
+        final int croppedHeight = 160;
+
+        BufferedImage bufferedImage = ImageIO.read(profileImageInput.getInputStream());
+
+        ImageUtil.writeImageToStream(baos, croppedWidth, croppedHeight, bufferedImage);
+
         long loggedInUserId = getLoggedInUserId(request);
-//        service.updatePortrait(loggedInUserId, baos.toByteArray());
-        service.updatePortrait(loggedInUserId, profileImageInput.getBytes());
+        service.updatePortrait(loggedInUserId, baos.toByteArray());
     }
 
     @ResourceMapping(value = "submitProperty")

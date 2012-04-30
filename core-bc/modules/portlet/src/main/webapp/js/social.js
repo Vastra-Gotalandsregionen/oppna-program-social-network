@@ -97,9 +97,10 @@ AUI().add('social-config', function(A) {
                         var node = theEditable.get('node');
                         var nodeValue = node.html();
 
-                        A.io.request(instance._originalConfig.submitUrl + '&key=' + key + '&value=' + nodeValue, {
+                        A.io.request(instance._originalConfig.submitUrl, {
                             method: 'POST',
                             dataType: 'json',
+                            data: {'key':key,'value':nodeValue},
                             on: {
                                 success: function (event, id, xhr) {
                                     var res = this.get('responseData');
