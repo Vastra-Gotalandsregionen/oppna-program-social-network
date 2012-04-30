@@ -39,7 +39,23 @@
 
     .public-profile .user-about-text {
         min-height: 50px;
-        min-width: 350px;
+        min-width: 240px;
+    }
+
+    .public-profile .edit-profile-image {
+        background: transparent url(/regionportalen-theme/images/common/edit.png) right center no-repeat;
+        display: none;
+        height: 16px;
+        position: absolute;
+        right: 4px;
+        text-indent: -9999em;
+        top: 4px;
+        width: 16px;
+    }
+
+    .public-profile .image-wrapper {
+        position: relative;
+        display: inline-block;
     }
 
     .profile-edit-trigger {
@@ -72,10 +88,13 @@
         <h2><a href="${userUrlPrefix}${user.screenName}"><c:out value="${user.fullName}"/></a></h2>
         <c:choose>
             <c:when test="${ownProfile}">
-                <a id="<portlet:namespace/>editProfileImage" href="${editProfileImage}" title="Ändra bild">
-                    <img alt="<liferay-ui:message key="user-portrait" />" class="user-profile-image"
-                         src="${profileImage}"/>
-                </a>
+                <span class="image-wrapper">
+                    <a id="<portlet:namespace/>editProfileImage" href="${editProfileImage}" title="Ändra bild">
+                        <img alt="<liferay-ui:message key="user-portrait" />" class="user-profile-image"
+                             src="${profileImage}"/>
+                        <span class="edit-profile-image"></span>
+                    </a>
+                </span>
             </c:when>
             <c:otherwise>
                 <img alt="<liferay-ui:message key="user-portrait" />" class="user-profile-image" src="${profileImage}"/>
@@ -120,7 +139,10 @@
                 <span id="<portlet:namespace/>userAboutCheck" style="display: none;"
                       class="portlet-msg-success">Sparat!</span>
             </c:if>
-            <div id="<portlet:namespace/>userAboutText" class="user-about-text"><c:out value="${userAbout}"/></div>
+            <c:set var="escapedUserAbout" value="${fn:escapeXml(userAbout)}"/>
+            <c:set var="escapedUserAbout" value="${fn:replace(escapedUserAbout, '&lt;BR&gt;', '<BR>')}"/>
+            <c:set var="escapedUserAbout" value="${fn:replace(escapedUserAbout, '&lt;br&gt;', '<BR>')}"/>
+            <div id="<portlet:namespace/>userAboutText" class="user-about-text">${escapedUserAbout}</div>
         </p>
 
         <p>
@@ -135,8 +157,19 @@
     </div>
 
 <c:if test="${ownProfile}">
-    <script type="text/javascript" src="<%= request.getContextPath() %>/js/social-config.js"></script>
+    <script type="text/javascript" src="<%= request.getContextPath() %>/js/social.js"></script>
     <aui:script use="aui-base,social-config">
         <%@ include file="profile.jspf" %>
     </aui:script>
+
+    <script type="text/javascript">
+        AUI().ready(function(A) {
+            A.one('#<portlet:namespace/>editProfileImage').on('mouseover', function(e) {
+                A.one('.edit-profile-image').setStyle('display', 'inline-block');
+            });
+            A.one('#<portlet:namespace/>editProfileImage').on('mouseout', function(e) {
+                A.one('.edit-profile-image').setStyle('display', 'none');
+            });
+        })
+    </script>
 </c:if>

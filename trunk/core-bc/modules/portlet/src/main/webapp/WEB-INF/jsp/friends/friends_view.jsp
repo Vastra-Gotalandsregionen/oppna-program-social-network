@@ -106,7 +106,7 @@
                     </a>
                     <c:if test="${ownProfile}">
                         <span class="delete-friend">
-                            <a href="${deleteFriend}"><span title="Ta bort" class="delete">&nbsp;</span></a>
+                            <a href="${deleteFriend}"><span title="Ta bort" class="delete"></span></a>
                         </span>
                     </c:if>
                 </div>
