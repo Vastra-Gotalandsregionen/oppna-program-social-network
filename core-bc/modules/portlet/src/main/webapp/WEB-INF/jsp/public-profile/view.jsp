@@ -170,6 +170,6 @@
             A.one('#<portlet:namespace/>editProfileImage').on('mouseout', function(e) {
                 A.one('.edit-profile-image').setStyle('display', 'none');
             });
-        })
+        });
     </script>
 </c:if>

@@ -81,8 +81,8 @@
                             <span><c:out value="${user.fullName}"/></span>
                         </a>
                         <span class="accept-reject">
-                            <a href="${acceptFriend}"><span title="Godkänn" class="accept">&nbsp;</span></a>
-                            <a href="${rejectFriend}"><span title="Avslå" class="reject">&nbsp;</span></a>
+                            <a href="${acceptFriend}"><span title="Godkänn" class="accept"></span></a>
+                            <a href="${rejectFriend}"><span title="Avslå" class="reject"></span></a>
                         </span>
                     </div>
                 </li>
@@ -105,8 +105,8 @@
                         <span>${friend.fullName}</span>
                     </a>
                     <c:if test="${ownProfile}">
-                        <span class="delete-friend">
-                            <a href="${deleteFriend}"><span title="Ta bort" class="delete"></span></a>
+                        <span>
+                            <a class="delete-friend" href="${deleteFriend}"><span title="Ta bort" class="delete"></span></a>
                         </span>
                     </c:if>
                 </div>
@@ -114,3 +114,8 @@
         </c:forEach>
     </ul>
 </div>
+
+<c:if test="${ownProfile}">
+    <script type="text/javascript" src="<%= request.getContextPath() %>/js/friends.js">
+    </script>
+</c:if>
