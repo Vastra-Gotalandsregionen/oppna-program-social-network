@@ -4,6 +4,7 @@
         <category name="VGR Social">
                 <portlet id="public-profile" />
                 <portlet id="friends" />
+                <portlet id="profile-stream" />
         </category>
 </display>
 

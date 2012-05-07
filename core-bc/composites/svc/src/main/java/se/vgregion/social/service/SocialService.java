@@ -11,16 +11,14 @@ import com.liferay.portlet.imagegallery.service.IGImageLocalServiceUtil;
 import com.liferay.portlet.social.model.SocialRelationConstants;
 import com.liferay.portlet.social.model.SocialRequest;
 import com.liferay.portlet.social.model.SocialRequestConstants;
-import com.liferay.portlet.social.service.SocialRelationLocalService;
-import com.liferay.portlet.social.service.SocialRelationLocalServiceUtil;
-import com.liferay.portlet.social.service.SocialRequestLocalService;
-import com.liferay.portlet.social.service.SocialRequestLocalServiceUtil;
+import com.liferay.portlet.social.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import se.vgregion.liferay.expando.UserExpandoHelper;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -176,9 +174,17 @@ public class SocialService {
         addFriendRelation(socialRequest.getUserId(), socialRequest.getReceiverUserId());
 
         socialRequest.setStatus(SocialRequestConstants.STATUS_CONFIRM);
+
+        User user = getUserById(socialRequest.getUserId());
+
         try {
+            SocialActivityLocalServiceUtil.addActivity(socialRequest.getUserId(), user.getGroup().getGroupId(), new Date(),
+                    SocialRequest.class.getName(), socialRequest.getClassPK(), socialRequest.getType(), "",
+                    socialRequest.getReceiverUserId()); // todo May need refinement
             socialRequestLocalService.updateSocialRequest(socialRequest);
         } catch (SystemException e) {
+            throw new SocialServiceException(e);
+        } catch (PortalException e) {
             throw new SocialServiceException(e);
         }
     }

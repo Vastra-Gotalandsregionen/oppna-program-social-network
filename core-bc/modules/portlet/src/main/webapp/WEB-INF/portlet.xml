@@ -54,6 +54,26 @@
     <supported-public-render-parameter>vgrProfileId</supported-public-render-parameter>
   </portlet>
 
+  <portlet>
+    <portlet-name>profile-stream</portlet-name>
+    <display-name>Profilflöde</display-name>
+    <portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
+    <expiration-cache>0</expiration-cache>
+
+    <supports>
+      <mime-type>text/html</mime-type>
+      <portlet-mode>VIEW</portlet-mode>
+    </supports>
+    <supported-locale>sv</supported-locale>
+
+    <portlet-info>
+      <title>Profilflöde</title>
+      <short-title>Profilflöde</short-title>
+      <keywords>profile-stream</keywords>
+    </portlet-info>
+
+    <supported-public-render-parameter>vgrProfileId</supported-public-render-parameter>
+  </portlet>
 
   <user-attribute>
     <description>User Login ID</description>

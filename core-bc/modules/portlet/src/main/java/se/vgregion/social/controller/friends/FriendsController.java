@@ -41,8 +41,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This controller class performs a search for actors.
- *
  * @author Patrik Bergström
  */
 
