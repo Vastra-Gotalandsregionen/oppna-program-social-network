@@ -44,7 +44,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 /**
- * This controller class performs a search for actors.
  *
  * @author simgo3
  * @author Patrik Bergström

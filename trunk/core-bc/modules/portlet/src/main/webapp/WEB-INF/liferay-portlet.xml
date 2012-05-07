@@ -17,6 +17,12 @@
     <css-class-wrapper>friends-portlet</css-class-wrapper>
   </portlet>
 
+  <portlet>
+    <portlet-name>profile-stream</portlet-name>
+    <instanceable>false</instanceable>
+    <css-class-wrapper>profile-stream-portlet</css-class-wrapper>
+  </portlet>
+
   <role-mapper>
     <role-name>administrator</role-name>
     <role-link>Administrator</role-link>
